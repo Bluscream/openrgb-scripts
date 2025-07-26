@@ -100,6 +100,48 @@ def parse_color(color_str: str) -> RGBColor:
     return Colors.WHITE.value
 
 
+def parse_brightness(brightness_str: str) -> float:
+    """
+    Parse brightness string into float value (0.0 to 1.0).
+    
+    Args:
+        brightness_str: Brightness string (e.g., '0.5', '50%', 'random')
+        
+    Returns:
+        Float value between 0.0 and 1.0
+        
+    Example:
+        # Parse different brightness formats
+        half = parse_brightness('0.5')
+        quarter = parse_brightness('25%')
+        random_brightness = parse_brightness('random')
+    """
+    brightness_str = brightness_str.strip().lower()
+    
+    # Handle random brightness
+    if brightness_str == "random":
+        return random.uniform(0.1, 1.0)  # Random between 10% and 100%
+    
+    # Handle percentage format
+    if brightness_str.endswith('%'):
+        try:
+            percentage = float(brightness_str[:-1])  # Remove % and convert to float
+            return max(0.0, min(1.0, percentage / 100.0))  # Clamp to 0.0-1.0
+        except ValueError:
+            pass
+    
+    # Handle float format
+    try:
+        value = float(brightness_str)
+        return max(0.0, min(1.0, value))  # Clamp to 0.0-1.0
+    except ValueError:
+        pass
+    
+    # Default to 1.0 if parsing fails
+    print(f"Warning: Could not parse brightness '{brightness_str}', using 1.0")
+    return 1.0
+
+
 def lerp_color(color1: RGBColor, color2: RGBColor, t: float) -> RGBColor:
     """
     Linearly interpolate between two RGBColor objects.

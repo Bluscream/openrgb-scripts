@@ -102,8 +102,8 @@ python __main__.py --effect RandomColors --options "per_device=true,sleep_s=0.3"
 
 # Static effect examples
 python __main__.py --effect Static --options "color=blue,max_brightness=0.8"
-python __main__.py --effect Static --options "color=255,0,255,max_brightness=0.6"
-python __main__.py --effect Static --options "color=#00FF00,max_brightness=0.5"
+python __main__.py --effect Static --options "color=255,0,255,max_brightness=50%"
+python __main__.py --effect Static --options "color=#00FF00,max_brightness=random"
 python __main__.py --effect Static --options "color=random,max_brightness=0.7"
 
 # Lightning effect examples
@@ -121,8 +121,8 @@ python __main__.py --effect AudioLoopback --options "use_loopback=true,frequency
 
 # Breathing effect examples
 python __main__.py --effect Breathing --options "color=red,breathing_speed=1.5"
-python __main__.py --effect Breathing --options "color=255,0,255,breathing_speed=3,min_brightness=0.2"
-python __main__.py --effect Breathing --options "color=#00FF00,breathing_speed=0.8,min_brightness=0.05"
+python __main__.py --effect Breathing --options "color=255,0,255,breathing_speed=3,min_brightness=20%"
+python __main__.py --effect Breathing --options "color=#00FF00,breathing_speed=0.8,min_brightness=random"
 python __main__.py --effect Breathing --options "color=random,breathing_speed=2.0,min_brightness=0.1"
 
 ### Windows Command Files
@@ -173,7 +173,7 @@ print(f"Rainbow effect options: {info['options']}")
 All effects support these common options:
 - `sleep_s`: Sleep time between iterations
 - `devices`: List of device indices to target (None or empty for all devices)
-- `max_brightness`: Brightness multiplier (0.0 to 1.0)
+- `max_brightness`: Brightness multiplier (0.0 to 1.0, or "50%", "random")
 
 ### Device Selection
 
@@ -191,7 +191,7 @@ options = EffectOptions(devices=[1])  # Device 1 only
 ### Using Colors
 
 ```python
-from classes import Colors, RAINBOW_COLORS, lerp_color, parse_color
+from classes import Colors, RAINBOW_COLORS, lerp_color, parse_color, parse_brightness
 
 # Access predefined colors
 red_color = Colors.RED.value
@@ -206,6 +206,11 @@ red = parse_color('red')
 purple = parse_color('255,0,255')
 green = parse_color('#00FF00')
 random_color = parse_color('random')
+
+# Parse brightness from strings
+half_brightness = parse_brightness('0.5')
+quarter_brightness = parse_brightness('25%')
+random_brightness = parse_brightness('random')
 
 # Interpolate between colors
 mid_color = lerp_color(Colors.RED.value, Colors.BLUE.value, 0.5)  # Purple

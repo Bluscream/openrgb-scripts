@@ -48,6 +48,8 @@ def display_effects_menu(controller):
 
 def get_effect_options(controller, effect_name):
     """Get effect options from user or use defaults."""
+    from classes import parse_brightness
+    
     info = controller.get_effect_info(effect_name)
     
     # Call effect's info() method
@@ -62,6 +64,7 @@ def get_effect_options(controller, effect_name):
     
     print(f"\n=== {effect_name} Options ===")
     print("Press Enter to use default values, or enter custom values:")
+    print("For brightness values, you can use: 0.5, 50%, random")
     
     options = {}
     for param_name, param_info in info['options'].items():
@@ -104,8 +107,16 @@ def get_effect_options(controller, effect_name):
                         print("This parameter requires a value")
                         continue
                 else:
+                    # Handle brightness-related parameters with parse_brightness
+                    if param_name in ['max_brightness', 'min_brightness', 'brightness']:
+                        try:
+                            options[param_name] = parse_brightness(value)
+                            break
+                        except Exception as e:
+                            print(f"Invalid brightness value: {e}")
+                            continue
                     # Parse the value
-                    if value.lower() == 'none':
+                    elif value.lower() == 'none':
                         options[param_name] = None
                     elif param_type == bool:
                         if value.lower() in ('true', '1', 'yes', 'on'):
@@ -209,6 +220,8 @@ def parse_options(options_str):
     if not options_str:
         return {}
     
+    from classes import parse_brightness
+    
     options = {}
     for option in options_str.split(','):
         if '=' in option:
@@ -216,19 +229,35 @@ def parse_options(options_str):
             key = key.strip()
             value = value.strip()
             
-            # Try to parse as different types
-            try:
-                if value.lower() == 'none':
-                    options[key] = None
-                elif value.lower() in ('true', 'false'):
-                    options[key] = value.lower() == 'true'
-                elif '.' in value:
-                    options[key] = float(value)
-                else:
-                    options[key] = int(value)
-            except ValueError:
-                # Keep as string
-                options[key] = value
+            # Handle brightness-related parameters with parse_brightness
+            if key in ['max_brightness', 'min_brightness', 'brightness']:
+                try:
+                    options[key] = parse_brightness(value)
+                except Exception:
+                    # Fallback to original parsing if parse_brightness fails
+                    try:
+                        if value.lower() == 'none':
+                            options[key] = None
+                        elif '.' in value:
+                            options[key] = float(value)
+                        else:
+                            options[key] = int(value)
+                    except ValueError:
+                        options[key] = value
+            else:
+                # Try to parse as different types
+                try:
+                    if value.lower() == 'none':
+                        options[key] = None
+                    elif value.lower() in ('true', 'false'):
+                        options[key] = value.lower() == 'true'
+                    elif '.' in value:
+                        options[key] = float(value)
+                    else:
+                        options[key] = int(value)
+                except ValueError:
+                    # Keep as string
+                    options[key] = value
     
     return options
 
