@@ -58,13 +58,41 @@ class AudioEffect(Effect):
         self.is_fading = False
         self.lock = threading.Lock()
         self.running = False
+    
+    @classmethod
+    def info(cls):
+        """Display information about available audio devices."""
+        print("\n=== Audio Device Information ===")
+        try:
+            devices = sd.query_devices()
+            print("Available audio input devices:")
+            for i, device in enumerate(devices):
+                # Handle different device dictionary structures
+                max_inputs = device.get('max_inputs', 0)
+                if max_inputs > 0:
+                    device_name = device.get('name', f'Device {i}')
+                    sample_rate = device.get('default_samplerate', 'Unknown')
+                    print(f"  {i}: {device_name} (inputs: {max_inputs}, sample rates: {sample_rate}Hz)")
+            
+            # Show default device
+            try:
+                default_device = sd.default.device[0]  # Input device
+                print(f"\nDefault input device: {default_device}")
+            except Exception as e:
+                print(f"\nCould not determine default input device: {e}")
+                
+        except Exception as e:
+            print(f"Error querying audio devices: {e}")
+            print("Make sure sounddevice is properly installed and audio drivers are working.")
+            print("You can still use the effect with default settings.")
         
     def _get_default_input_device(self):
         """Get the default input device index."""
         try:
             devices = sd.query_devices()
             for i, device in enumerate(devices):
-                if device['max_inputs'] > 0:
+                max_inputs = device.get('max_inputs', 0)
+                if max_inputs > 0:
                     return i
             return None
         except Exception as e:

@@ -9,6 +9,7 @@ with various lighting effects. Effects are discovered dynamically at runtime.
 import sys
 import argparse
 from classes import OpenRGBController
+from classes.EffectDiscovery import EffectDiscovery
 
 
 def display_effects_menu(controller):
@@ -47,6 +48,12 @@ def display_effects_menu(controller):
 def get_effect_options(controller, effect_name):
     """Get effect options from user or use defaults."""
     info = controller.get_effect_info(effect_name)
+    
+    # Call effect's info() method
+    effects = EffectDiscovery.discover_effects()
+    if effect_name in effects:
+        effect_class, _ = effects[effect_name]
+        effect_class.info()
     
     if not info['options']:
         print(f"Using default options for {effect_name}")

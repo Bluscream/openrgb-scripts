@@ -28,6 +28,19 @@ class Effect(ABC):
         self.options = options
         self.running = False
     
+    @classmethod
+    def info(cls):
+        """
+        Display information about the effect.
+        This method can be overridden by subclasses to provide specific information.
+        """
+        print(f"\n=== {cls.__name__.replace('Effect', '')} Effect Information ===")
+        print(f"Class: {cls.__name__}")
+        if cls.__doc__:
+            print(f"Description: {cls.__doc__.strip()}")
+        else:
+            print("Description: No description available")
+    
     def clamp_brightness(self, color: RGBColor) -> RGBColor:
         """
         Clamp the brightness of an RGBColor object based on max_brightness.

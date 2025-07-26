@@ -68,6 +68,63 @@ class AudioLoopbackEffect(Effect):
         self.is_fading = False
         self.lock = threading.Lock()
         self.running = False
+    
+    @classmethod
+    def info(cls):
+        """Display information about available audio devices, including loopback devices."""
+        print("\n=== Audio Loopback Device Information ===")
+        try:
+            devices = sd.query_devices()
+            print("Available audio input devices:")
+            
+            loopback_devices = []
+            regular_input_devices = []
+            
+            for i, device in enumerate(devices):
+                # Handle different device dictionary structures
+                max_inputs = device.get('max_inputs', 0)
+                if max_inputs > 0:
+                    device_name = device.get('name', f'Device {i}')
+                    sample_rate = device.get('default_samplerate', 'Unknown')
+                    device_info = f"  {i}: {device_name} (inputs: {max_inputs}, sample rates: {sample_rate}Hz)"
+                    
+                    # Check if this looks like a loopback device
+                    if ('mix' in device_name.lower() or 
+                        'stereo' in device_name.lower() or
+                        'loopback' in device_name.lower()):
+                        loopback_devices.append((i, device_info))
+                    else:
+                        regular_input_devices.append((i, device_info))
+            
+            # Display loopback devices first
+            if loopback_devices:
+                print("\nLoopback devices (recommended for system audio):")
+                for i, device_info in loopback_devices:
+                    print(f"  * {device_info}")
+            
+            # Display regular input devices
+            if regular_input_devices:
+                print("\nRegular input devices:")
+                for i, device_info in regular_input_devices:
+                    print(f"  {device_info}")
+            
+            # Show default device
+            try:
+                default_device = sd.default.device[0]  # Input device
+                print(f"\nDefault input device: {default_device}")
+            except Exception as e:
+                print(f"\nCould not determine default input device: {e}")
+            
+            # Provide helpful tips
+            print("\nTips:")
+            print("  - Use loopback devices (like 'Stereo Mix') to capture system audio output")
+            print("  - On Windows, enable 'Stereo Mix' in Sound settings if not visible")
+            print("  - On Linux, use 'Monitor of' devices for loopback recording")
+                
+        except Exception as e:
+            print(f"Error querying audio devices: {e}")
+            print("Make sure sounddevice is properly installed and audio drivers are working.")
+            print("You can still use the effect with default settings.")
         
     def _get_loopback_device(self):
         """Get a loopback device for system audio recording."""
@@ -75,10 +132,12 @@ class AudioLoopbackEffect(Effect):
             devices = sd.query_devices()
             # Look for loopback devices (like "Stereo Mix" on Windows)
             for i, device in enumerate(devices):
-                if (device['max_inputs'] > 0 and 
-                    ('mix' in device['name'].lower() or 
-                     'stereo' in device['name'].lower() or
-                     'loopback' in device['name'].lower())):
+a                max_inputs = device.get('max_inputs', 0)
+                device_name = device.get('name', '')
+                if (max_inputs > 0 and 
+                    ('mix' in device_name.lower() or 
+                     'stereo' in device_name.lower() or
+                     'loopback' in device_name.lower())):
                     return i
             return None
         except Exception as e:
@@ -90,7 +149,8 @@ class AudioLoopbackEffect(Effect):
         try:
             devices = sd.query_devices()
             for i, device in enumerate(devices):
-                if device['max_inputs'] > 0:
+                max_inputs = device.get('max_inputs', 0)
+                if max_inputs > 0:
                     return i
             return None
         except Exception as e:
