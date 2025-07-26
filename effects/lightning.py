@@ -13,7 +13,7 @@ class LightningOptions(EffectOptions):
     """
     
     def __init__(self, 
-                 sleep_s: float = 1.0,
+                 sleep_s: float = 0.5,
                  devices: list = None,
                  max_brightness: float = 1.0,
                  color: str = "white",
