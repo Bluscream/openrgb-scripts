@@ -27,6 +27,12 @@ A modular system for controlling OpenRGB devices with various lighting effects.
 - Random color assignment per device or all devices
 - Customizable color palette
 
+### Static
+- Sets devices to a specific color and keeps them static
+- Supports any color (named colors, RGB values, or hex codes)
+- Configurable brightness control
+- Perfect for setting a solid color across all devices
+
 ### Lightning
 - Simulates lightning strikes with bright flashes and fade-out
 - Configurable colors (random or specific)
@@ -51,6 +57,12 @@ A modular system for controlling OpenRGB devices with various lighting effects.
 - Configurable frequency bands and audio analysis
 - Supports both loopback recording and microphone input
 - Real-time FFT analysis for frequency detection
+
+### Breathing
+- Smoothly fades a color in and out to create a breathing effect
+- Configurable breathing speed (cycles per second)
+- Adjustable minimum brightness for subtle breathing
+- Supports any color (named colors, RGB values, or hex codes)
 
 ## Installation
 
@@ -88,6 +100,11 @@ python __main__.py --effect PoliceLights --options "max_brightness=0.5,flash_dur
 # Run with multiple options
 python __main__.py --effect RandomColors --options "per_device=true,sleep_s=0.3"
 
+# Static effect examples
+python __main__.py --effect Static --options "color=blue,max_brightness=0.8"
+python __main__.py --effect Static --options "color=255,0,255,max_brightness=0.6"
+python __main__.py --effect Static --options "color=#00FF00,max_brightness=0.5"
+
 # Lightning effect examples
 python __main__.py --effect Lightning --options "color=white,target_mode=random"
 python __main__.py --effect Lightning --options "color=random,target_mode=all,fade_min_ms=200,fade_max_ms=800"
@@ -99,6 +116,29 @@ python __main__.py --effect Desktop --options "color_sampling=average,smooth_tra
 # Audio effect examples
 python __main__.py --effect Audio --options "peak_threshold=0.05,peak_duration=0.1"
 python __main__.py --effect AudioLoopback --options "use_loopback=true,frequency_bands=[60,250,500,2000,4000,8000]"
+
+# Breathing effect examples
+python __main__.py --effect Breathing --options "color=red,breathing_speed=1.5"
+python __main__.py --effect Breathing --options "color=255,0,255,breathing_speed=3,min_brightness=0.2"
+python __main__.py --effect Breathing --options "color=#00FF00,breathing_speed=0.8,min_brightness=0.05"
+
+### Windows Command Files
+
+For Windows users, convenient command files are available in the `tools/` directory:
+
+```cmd
+# Basic breathing effect (white, speed 2, min brightness 0.1)
+tools\breathing.cmd
+
+# Custom breathing parameters (color, speed, min_brightness, max_brightness)
+tools\breathing.cmd red 1.5 0.2 0.8
+
+# Static color effect
+tools\static.cmd blue 0.7
+
+# Rainbow effect
+tools\rainbow.cmd
+```
 
 ### Programmatic Usage
 
@@ -213,7 +253,13 @@ openrgb/
 │   ├── lightning.py     # Lightning effect
 │   ├── desktop.py       # Desktop color sampling effect
 │   ├── audio.py         # Audio input effect
-│   └── audio_loopback.py # Advanced audio loopback effect
+│   ├── audio_loopback.py # Advanced audio loopback effect
+│   └── breathing.py     # Breathing effect
+├── tools/               # Windows command files
+│   ├── breathing.cmd    # Breathing effect command
+│   ├── static.cmd       # Static color command
+│   ├── rainbow.cmd      # Rainbow effect command
+│   └── lighting.cmd     # Lighting effect command
 ├── requirements.txt     # Python dependencies
 └── README.md           # This file
 ```

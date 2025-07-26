@@ -1,0 +1,11 @@
+@echo off
+cd /d "%~dp0\.."
+set "color=%1"
+if "%color%"=="" set "color=white"
+set "speed=%2"
+if "%speed%"=="" set "speed=2"
+set "min_brightness=%3"
+if "%min_brightness%"=="" set "min_brightness=0.1"
+set "max_brightness=%4"
+if "%max_brightness%"=="" set "max_brightness=1"
+python __main__.py --effect Breathing -o "color=%color%,breathing_speed=%speed%,min_brightness=%min_brightness%,max_brightness=%max_brightness%" 

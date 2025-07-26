@@ -15,8 +15,7 @@ class StaticOptions(EffectOptions):
                  sleep_s: float = 1.0,
                  devices: list = None,
                  max_brightness: float = 1.0,
-                 color: str = "white",
-                 brightness: float = 1.0):
+                 color: str = "white"):
         """
         Initialize static options.
         
@@ -26,7 +25,7 @@ class StaticOptions(EffectOptions):
         """
         super().__init__(sleep_s, devices, max_brightness)
         self.color = color
-        self.brightness = brightness
+        self.max_brightness = max_brightness
 
 
 class StaticEffect(Effect):
@@ -93,12 +92,12 @@ class StaticEffect(Effect):
 
     def start(self):
         """Initialize the effect."""
-        print(f"Starting static effect with color: {self.options.color}, brightness: {self.options.brightness}")
+        print(f"Starting static effect with color: {self.options.color}, brightness: {self.options.max_brightness}")
         self.target_color = self._parse_color(self.options.color)
         # Apply brightness to the color and clamp to valid range
-        r = max(0, min(255, int(self.target_color.red * self.options.brightness)))
-        g = max(0, min(255, int(self.target_color.green * self.options.brightness)))
-        b = max(0, min(255, int(self.target_color.blue * self.options.brightness)))
+        r = max(0, min(255, int(self.target_color.red * self.options.max_brightness)))
+        g = max(0, min(255, int(self.target_color.green * self.options.max_brightness)))
+        b = max(0, min(255, int(self.target_color.blue * self.options.max_brightness)))
         self.target_color = RGBColor(r, g, b)
         # Set the color immediately
         self.set_all_target_devices_color(self.target_color)
