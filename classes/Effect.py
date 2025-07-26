@@ -121,21 +121,30 @@ class Effect(ABC):
         """
         pass
     
-    def run(self):
+    def run(self, exit_after_one=False):
         """
         Run the effect in a continuous loop until stopped.
+        
+        Args:
+            exit_after_one: If True, run only one iteration and exit
         """
         self.running = True
         self.start()
         
         try:
-            while self.running:
+            if exit_after_one:
+                # Run only one iteration
                 self.loop()
-                time.sleep(self.options.sleep_s)
+            else:
+                # Run continuous loop
+                while self.running:
+                    self.loop()
+                    time.sleep(self.options.sleep_s)
         except KeyboardInterrupt:
             pass
         finally:
-            self.stop()
+            if not exit_after_one:
+                self.stop()
     
     def stop_effect(self):
         """

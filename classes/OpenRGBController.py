@@ -43,12 +43,15 @@ class OpenRGBController:
         
         effect_class, options_class = effects[effect_name]
         
+        # Extract exit_after_one parameter
+        exit_after_one = options.pop('exit_after_one', False)
+        
         # Create options instance
         opts = options_class(**options)
         
         # Create and run effect
         effect = effect_class(self.client, opts)
-        self._run_effect(effect, effect_name)
+        self._run_effect(effect, effect_name, exit_after_one)
     
     def get_available_effects(self):
         """Get list of available effects."""
@@ -64,16 +67,17 @@ class OpenRGBController:
         effect_class, options_class = effects[effect_name]
         return EffectDiscovery.get_effect_info(effect_class, options_class)
     
-    def _run_effect(self, effect, effect_name):
+    def _run_effect(self, effect, effect_name, exit_after_one=False):
         """Run an effect with proper error handling."""
         try:
             print(f"\nStarting {effect_name} effect...")
-            print("Press Ctrl+C to stop")
-            effect.run()
+            if not exit_after_one:
+                print("Press Ctrl+C to stop")
+            effect.run(exit_after_one=exit_after_one)
         except KeyboardInterrupt:
             print(f"\nStopping {effect_name} effect...")
         finally:
-            if effect:
+            if effect and not exit_after_one:
                 effect.stop()
     
     def turn_off_all_lights(self):

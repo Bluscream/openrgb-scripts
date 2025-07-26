@@ -162,11 +162,13 @@ def run_interactive_mode(controller):
             print("Tip: Check that all option values are correct and try again.")
 
 
-def run_direct_mode(controller, effect_name, options):
+def run_direct_mode(controller, effect_name, options, exit_after_one=False):
     """Run a specific effect directly."""
     try:
         print(f"Starting {effect_name} effect...")
-        controller.run_effect(effect_name, **options)
+        if exit_after_one:
+            print("Exit mode: Will skip cleanup and exit after one iteration")
+        controller.run_effect(effect_name, **options, exit_after_one=exit_after_one)
     except KeyboardInterrupt:
         print(f"\nStopped {effect_name} effect")
     except Exception as e:
@@ -264,7 +266,7 @@ Examples:
     )
     
     parser.add_argument(
-        '/exit',
+        '/exit', '--exit', '-e',
         action='store_true',
         help='Skip cleanup and exit after one iteration (for static effects)'
     )
@@ -296,7 +298,7 @@ Examples:
         elif args.effect:
             # Direct mode
             options = parse_options(args.options)
-            run_direct_mode(controller, args.effect, options)
+            run_direct_mode(controller, args.effect, options, args.exit)
         else:
             # Interactive mode
             run_interactive_mode(controller)
@@ -306,7 +308,8 @@ Examples:
         print(f"Error: {e}")
         sys.exit(1)
     finally:
-        controller.turn_off_all_lights()
+        if not args.exit:
+            controller.turn_off_all_lights()
 
 
 if __name__ == "__main__":
