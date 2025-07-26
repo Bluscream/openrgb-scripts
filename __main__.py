@@ -8,6 +8,7 @@ including flashing patterns, rainbow effects, and police lights.
 
 import time
 import sys
+import random	
 from openrgb import OpenRGBClient
 from openrgb.utils import RGBColor, DeviceType
 
@@ -153,6 +154,15 @@ class OpenRGBController:
             self.set_all_devices_color(clamped_color)
             time.sleep(sleep_s)
     
+    def each_device_random_color(self, sleep_s=0.2):
+        """
+        Set each device to a random color.
+        """
+        for device in self.client.devices:
+            color = random.choice(list(self.colors.values()))
+            device.set_color(color)
+        time.sleep(sleep_s)
+    
     def rainbow_smooth(self, steps_per_color=30, sleep_s=0.03):
         """
         Smoothly transition through a rainbow of colors on all RGB devices.
@@ -200,6 +210,9 @@ class OpenRGBController:
                         self.rainbow(sleep_s=0.2)
                     case "rainbow_smooth":
                         self.rainbow_smooth(steps_per_color=30, sleep_s=0.03)
+                    case "each_device_random_color":
+                        self.each_device_random_color(sleep_s=0.2)
+                
                 time.sleep(.01)
                 
         except KeyboardInterrupt:
@@ -219,7 +232,7 @@ def main():
         controller.connect()
         
         # Run the rainbow effect loop
-        controller.run_pattern_loop("rainbow_smooth")
+        controller.run_pattern_loop("each_device_random_color")
         
     except ConnectionRefusedError:
         print("Error: Could not connect to OpenRGB server.")
