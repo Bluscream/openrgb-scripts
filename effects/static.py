@@ -86,6 +86,7 @@ class StaticEffect(Effect):
         """
         Kill the own process.
         """
+        import os
         os.kill(os.getpid(), signal.SIGKILL)
         import sys
         sys.exit(0)
@@ -102,7 +103,7 @@ class StaticEffect(Effect):
         # Set the color immediately
         self.set_all_target_devices_color(self.target_color)
 
-        self._kill_own_process()
+        # self._kill_own_process()
     
     def loop(self):
         """Execute one iteration of the static effect."""
