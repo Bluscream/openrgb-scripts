@@ -10,6 +10,7 @@ import sys
 import argparse
 from classes import OpenRGBController
 from classes.EffectDiscovery import EffectDiscovery
+from classes.HASS import HASSLightController
 
 
 def display_effects_menu(controller):
@@ -271,6 +272,17 @@ Examples:
         print("Failed to connect to OpenRGB server. Make sure OpenRGB is running with --server flag.")
         sys.exit(1)
     
+    try:
+        hass = HASSLightController()
+        hass.set_effect("DDP", [
+            "light.esphome_blu_pc_kvm_desk_rgb_led_strip",
+            "light.esphome_closet_rgb_led_strip_2",
+            "light.esphome_suitcase_rgb_led_strip",
+            "light.esphome_closet_virtual_e1_31_light"
+        ])
+    except Exception as e:
+        print(f"Error setting effect on Home Assistant lights: {e}")
+
     try:
         if args.list:
             # List effects mode
