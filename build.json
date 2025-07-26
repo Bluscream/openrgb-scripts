@@ -1,0 +1,97 @@
+{
+ "version": "auto-py-to-exe-configuration_v1",
+ "pyinstallerOptions": [
+  {
+   "optionDest": "noconfirm",
+   "value": true
+  },
+  {
+   "optionDest": "filenames",
+   "value": "P:/Python/openrgb/__main__.py"
+  },
+  {
+   "optionDest": "onefile",
+   "value": true
+  },
+  {
+   "optionDest": "console",
+   "value": true
+  },
+  {
+   "optionDest": "name",
+   "value": "openrgb-effects"
+  },
+  {
+   "optionDest": "upx_dir",
+   "value": "C:/Program Files/AutoHotkey/Compiler"
+  },
+  {
+   "optionDest": "clean_build",
+   "value": true
+  },
+  {
+   "optionDest": "loglevel",
+   "value": "INFO"
+  },
+  {
+   "optionDest": "strip",
+   "value": false
+  },
+  {
+   "optionDest": "noupx",
+   "value": false
+  },
+  {
+   "optionDest": "disable_windowed_traceback",
+   "value": false
+  },
+  {
+   "optionDest": "uac_admin",
+   "value": false
+  },
+  {
+   "optionDest": "uac_uiaccess",
+   "value": false
+  },
+  {
+   "optionDest": "argv_emulation",
+   "value": false
+  },
+  {
+   "optionDest": "bootloader_ignore_signals",
+   "value": false
+  },
+  {
+   "optionDest": "datas",
+   "value": "P:/Python/openrgb/classes;classes/"
+  },
+  {
+   "optionDest": "datas",
+   "value": "P:/Python/openrgb/effects;effects/"
+  },
+  {
+   "optionDest": "hiddenimports",
+   "value": "openrgb"
+  },
+  {
+   "optionDest": "hiddenimports",
+   "value": "PIL"
+  },
+  {
+   "optionDest": "hiddenimports",
+   "value": "sounddevice"
+  },
+  {
+   "optionDest": "hiddenimports",
+   "value": "numpy"
+  },
+  {
+   "optionDest": "hiddenimports",
+   "value": "argparse"
+  }
+ ],
+ "nonPyinstallerOptions": {
+  "increaseRecursionLimit": true,
+  "manualArguments": ""
+ }
+}

@@ -1,3 +1,3 @@
 @REM cd ..
-call venv\Scripts\activate
+call .venv\Scripts\activate
 cls
