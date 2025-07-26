@@ -263,6 +263,12 @@ Examples:
         help='List all available effects'
     )
     
+    parser.add_argument(
+        '/exit',
+        action='store_true',
+        help='Skip cleanup and exit after one iteration (for static effects)'
+    )
+    
     args = parser.parse_args()
     
     # Initialize controller
