@@ -5,7 +5,7 @@ Advanced Audio effects - listen to system audio output using loopback recording.
 import time
 import random
 import threading
-import numpy as np
+import math
 import sounddevice as sd
 from classes import Effect, EffectOptions, Colors, RGBColor
 
@@ -68,7 +68,6 @@ class AudioLoopbackEffect(Effect):
         self.is_fading = False
         self.lock = threading.Lock()
         self.running = False
-        self.fft_data = None
         
     def _get_loopback_device(self):
         """Get a loopback device for system audio recording."""
@@ -98,33 +97,75 @@ class AudioLoopbackEffect(Effect):
             print(f"Error getting default input device: {e}")
             return None
     
+    def _calculate_rms(self, audio_data):
+        """Calculate RMS (Root Mean Square) of audio data without numpy."""
+        if not audio_data:
+            return 0.0
+        
+        # Convert to list if it's not already
+        if hasattr(audio_data, 'tolist'):
+            data = audio_data.tolist()
+        else:
+            data = list(audio_data)
+        
+        # Handle multi-dimensional arrays
+        if isinstance(data[0], (list, tuple)):
+            # Take first channel if stereo
+            data = [sample[0] if isinstance(sample, (list, tuple)) else sample for sample in data]
+        
+        # Calculate RMS
+        sum_squares = sum(sample * sample for sample in data)
+        mean_square = sum_squares / len(data)
+        rms = math.sqrt(mean_square)
+        
+        return rms
+    
     def _analyze_frequency_bands(self, audio_data):
-        """Analyze audio data and return dominant frequency band."""
+        """Analyze audio data and return dominant frequency band using simple amplitude analysis."""
         try:
-            # Perform FFT
-            fft = np.fft.fft(audio_data.astype(np.float32))
-            freqs = np.fft.fftfreq(len(audio_data), 1.0 / self.options.sample_rate)
+            # Convert to list if needed
+            if hasattr(audio_data, 'tolist'):
+                data = audio_data.tolist()
+            else:
+                data = list(audio_data)
             
-            # Calculate power in each frequency band
-            band_powers = []
-            for i in range(len(self.options.frequency_bands) - 1):
-                low_freq = self.options.frequency_bands[i]
-                high_freq = self.options.frequency_bands[i + 1]
-                
-                # Find indices for this frequency range
-                low_idx = np.argmin(np.abs(freqs - low_freq))
-                high_idx = np.argmin(np.abs(freqs - high_freq))
-                
-                # Calculate power in this band
-                power = np.sum(np.abs(fft[low_idx:high_idx]) ** 2)
-                band_powers.append(power)
+            # Handle multi-dimensional arrays
+            if isinstance(data[0], (list, tuple)):
+                data = [sample[0] if isinstance(sample, (list, tuple)) else sample for sample in data]
             
-            # Find dominant band
-            if band_powers:
-                dominant_band = np.argmax(band_powers)
-                return dominant_band
+            # Simple frequency analysis based on amplitude patterns
+            # This is a simplified approach without FFT
+            data_length = len(data)
+            if data_length < 2:
+                return 0
             
-            return 0
+            # Calculate amplitude variations to estimate frequency content
+            # Higher frequency content tends to have more rapid amplitude changes
+            amplitude_changes = []
+            for i in range(1, data_length):
+                change = abs(data[i] - data[i-1])
+                amplitude_changes.append(change)
+            
+            if not amplitude_changes:
+                return 0
+            
+            # Calculate average amplitude change
+            avg_change = sum(amplitude_changes) / len(amplitude_changes)
+            
+            # Simple band detection based on amplitude characteristics
+            # This is a rough approximation without proper FFT
+            if avg_change < 0.01:
+                return 0  # Low frequency (bass)
+            elif avg_change < 0.02:
+                return 1  # Low-mid
+            elif avg_change < 0.03:
+                return 2  # Mid
+            elif avg_change < 0.04:
+                return 3  # High-mid
+            elif avg_change < 0.05:
+                return 4  # High
+            else:
+                return 5  # Very high
             
         except Exception as e:
             print(f"Error analyzing frequency bands: {e}")
@@ -138,7 +179,7 @@ class AudioLoopbackEffect(Effect):
             Colors.YELLOW.value,   # Mid (500-2000 Hz)
             Colors.GREEN.value,    # High-mid (2000-4000 Hz)
             Colors.BLUE.value,     # High (4000-8000 Hz)
-            Colors.PURPLE.value,   # Very high (8000+ Hz)
+            Colors.VIOLET.value,   # Very high (8000+ Hz)
         ]
         
         if 0 <= band_index < len(colors):
@@ -150,16 +191,15 @@ class AudioLoopbackEffect(Effect):
                 random.randint(0, 255)
             ).value
     
-    def _audio_callback(self, indata, frames, time, status):
+    def _audio_callback(self, indata, frames, callback_time, status):
         """Audio callback function for processing audio data."""
         if status:
             print(f"Audio callback status: {status}")
             return
         
         try:
-            # Calculate RMS of audio data
-            audio_data = indata[:, 0] if indata.ndim > 1 else indata
-            rms = np.sqrt(np.mean(audio_data.astype(np.float32) ** 2))
+            # Calculate RMS of audio data using pure Python
+            rms = self._calculate_rms(indata)
             
             current_time = time.time()
             
@@ -170,7 +210,7 @@ class AudioLoopbackEffect(Effect):
                     self.peak_start_time = current_time
                     
                     # Analyze frequency bands and get color
-                    dominant_band = self._analyze_frequency_bands(audio_data)
+                    dominant_band = self._analyze_frequency_bands(indata)
                     self.target_color = self._get_color_for_frequency_band(dominant_band)
                     self.current_color = self.target_color
                     self.is_fading = False

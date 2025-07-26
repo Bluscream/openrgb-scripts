@@ -5,7 +5,7 @@ Audio effects - listen to audio and flash devices based on audio peaks.
 import time
 import random
 import threading
-import numpy as np
+import math
 import sounddevice as sd
 from classes import Effect, EffectOptions, Colors, RGBColor
 
@@ -70,17 +70,39 @@ class AudioEffect(Effect):
         except Exception as e:
             print(f"Error getting default input device: {e}")
             return None
+    
+    def _calculate_rms(self, audio_data):
+        """Calculate RMS (Root Mean Square) of audio data without numpy."""
+        if not audio_data:
+            return 0.0
         
-    def _audio_callback(self, indata, frames, time, status):
+        # Convert to list if it's not already
+        if hasattr(audio_data, 'tolist'):
+            data = audio_data.tolist()
+        else:
+            data = list(audio_data)
+        
+        # Handle multi-dimensional arrays
+        if isinstance(data[0], (list, tuple)):
+            # Take first channel if stereo
+            data = [sample[0] if isinstance(sample, (list, tuple)) else sample for sample in data]
+        
+        # Calculate RMS
+        sum_squares = sum(sample * sample for sample in data)
+        mean_square = sum_squares / len(data)
+        rms = math.sqrt(mean_square)
+        
+        return rms
+        
+    def _audio_callback(self, indata, frames, callback_time, status):
         """Audio callback function for processing audio data."""
         if status:
             print(f"Audio callback status: {status}")
             return
         
         try:
-            # Calculate RMS of audio data
-            audio_data = indata[:, 0] if indata.ndim > 1 else indata
-            rms = np.sqrt(np.mean(audio_data.astype(np.float32) ** 2))
+            # Calculate RMS of audio data using pure Python
+            rms = self._calculate_rms(indata)
             
             current_time = time.time()
             
