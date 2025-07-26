@@ -266,7 +266,7 @@ Examples:
     )
     
     parser.add_argument(
-        '/exit', '--exit', '-e',
+        '--exit', '-e',
         action='store_true',
         help='Skip cleanup and exit after one iteration (for static effects)'
     )
