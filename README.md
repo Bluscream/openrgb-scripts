@@ -29,13 +29,13 @@ A modular system for controlling OpenRGB devices with various lighting effects.
 
 ### Static
 - Sets devices to a specific color and keeps them static
-- Supports any color (named colors, RGB values, or hex codes)
+- Supports any color (named colors, RGB values, hex codes, or 'random')
 - Configurable brightness control
 - Perfect for setting a solid color across all devices
 
 ### Lightning
 - Simulates lightning strikes with bright flashes and fade-out
-- Configurable colors (random or specific)
+- Configurable colors (random, named colors, RGB values, or hex codes)
 - Targets random devices or all devices
 - Adjustable fade-out timing (100-500ms)
 
@@ -62,7 +62,7 @@ A modular system for controlling OpenRGB devices with various lighting effects.
 - Smoothly fades a color in and out to create a breathing effect
 - Configurable breathing speed (cycles per second)
 - Adjustable minimum brightness for subtle breathing
-- Supports any color (named colors, RGB values, or hex codes)
+- Supports any color (named colors, RGB values, hex codes, or 'random')
 
 ## Installation
 
@@ -104,10 +104,12 @@ python __main__.py --effect RandomColors --options "per_device=true,sleep_s=0.3"
 python __main__.py --effect Static --options "color=blue,max_brightness=0.8"
 python __main__.py --effect Static --options "color=255,0,255,max_brightness=0.6"
 python __main__.py --effect Static --options "color=#00FF00,max_brightness=0.5"
+python __main__.py --effect Static --options "color=random,max_brightness=0.7"
 
 # Lightning effect examples
 python __main__.py --effect Lightning --options "color=white,target_mode=random"
 python __main__.py --effect Lightning --options "color=random,target_mode=all,fade_min_ms=200,fade_max_ms=800"
+python __main__.py --effect Lightning --options "color=255,0,255,target_mode=all,flash_duration_ms=100"
 
 # Desktop effect examples
 python __main__.py --effect Desktop --options "color_sampling=dominant,capture_interval_ms=100"
@@ -121,6 +123,7 @@ python __main__.py --effect AudioLoopback --options "use_loopback=true,frequency
 python __main__.py --effect Breathing --options "color=red,breathing_speed=1.5"
 python __main__.py --effect Breathing --options "color=255,0,255,breathing_speed=3,min_brightness=0.2"
 python __main__.py --effect Breathing --options "color=#00FF00,breathing_speed=0.8,min_brightness=0.05"
+python __main__.py --effect Breathing --options "color=random,breathing_speed=2.0,min_brightness=0.1"
 
 ### Windows Command Files
 
@@ -188,7 +191,7 @@ options = EffectOptions(devices=[1])  # Device 1 only
 ### Using Colors
 
 ```python
-from classes import Colors, RAINBOW_COLORS, lerp_color
+from classes import Colors, RAINBOW_COLORS, lerp_color, parse_color
 
 # Access predefined colors
 red_color = Colors.RED.value
@@ -197,6 +200,12 @@ blue_color = Colors.BLUE.value
 # Use rainbow colors
 first_rainbow_color = RAINBOW_COLORS[0]  # Red
 all_rainbow_colors = RAINBOW_COLORS      # List of all rainbow colors
+
+# Parse colors from strings
+red = parse_color('red')
+purple = parse_color('255,0,255')
+green = parse_color('#00FF00')
+random_color = parse_color('random')
 
 # Interpolate between colors
 mid_color = lerp_color(Colors.RED.value, Colors.BLUE.value, 0.5)  # Purple

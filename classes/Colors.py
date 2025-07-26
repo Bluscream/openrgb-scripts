@@ -2,6 +2,7 @@
 Color definitions for OpenRGB effects.
 """
 
+import random
 from enum import Enum
 from openrgb.utils import RGBColor
 
@@ -39,6 +40,64 @@ RAINBOW_COLORS = [
     Colors.INDIGO.value,
     Colors.VIOLET.value,
 ]
+
+
+def parse_color(color_str: str) -> RGBColor:
+    """
+    Parse color string into RGBColor object.
+    
+    Args:
+        color_str: Color string (e.g., 'red', '255,0,0', '#FF0000', 'random')
+        
+    Returns:
+        RGBColor object
+        
+    Example:
+        # Parse different color formats
+        red = parse_color('red')
+        purple = parse_color('255,0,255')
+        green = parse_color('#00FF00')
+        random_color = parse_color('random')
+    """
+    color_str = color_str.strip().lower()
+    
+    # Handle random color
+    if color_str == "random":
+        # Random color from available colors (excluding black)
+        available_colors = [color.value for color in Colors if color != Colors.BLACK]
+        return random.choice(available_colors)
+    
+    # Check if it's a predefined color name
+    if hasattr(Colors, color_str.upper()):
+        return getattr(Colors, color_str.upper()).value
+    
+    # Check if it's RGB values (comma-separated)
+    if ',' in color_str:
+        try:
+            parts = color_str.split(',')
+            if len(parts) == 3:
+                r = int(parts[0].strip())
+                g = int(parts[1].strip())
+                b = int(parts[2].strip())
+                return RGBColor(r, g, b)
+        except ValueError:
+            pass
+    
+    # Check if it's a hex color
+    if color_str.startswith('#'):
+        try:
+            hex_color = color_str[1:]  # Remove #
+            if len(hex_color) == 6:
+                r = int(hex_color[0:2], 16)
+                g = int(hex_color[2:4], 16)
+                b = int(hex_color[4:6], 16)
+                return RGBColor(r, g, b)
+        except ValueError:
+            pass
+    
+    # Default to white if parsing fails
+    print(f"Warning: Could not parse color '{color_str}', using white")
+    return Colors.WHITE.value
 
 
 def lerp_color(color1: RGBColor, color2: RGBColor, t: float) -> RGBColor:

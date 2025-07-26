@@ -4,7 +4,7 @@ Lightning effect - simulates lightning strikes with bright flashes and fade-out.
 
 import time
 import random
-from classes import Effect, EffectOptions, Colors, lerp_color
+from classes import Effect, EffectOptions, Colors, lerp_color, parse_color
 
 
 class LightningOptions(EffectOptions):
@@ -25,7 +25,7 @@ class LightningOptions(EffectOptions):
         Initialize lightning options.
         
         Args:
-            color: "random" or specific color name (e.g., "white", "blue", "yellow")
+            color: "random", color name (e.g., "white", "blue", "yellow"), RGB values (e.g., "255,0,0"), or hex codes (e.g., "#FF0000")
             target_mode: "random" (one random device) or "all" (all target devices)
             fade_min_ms: Minimum fade-out duration in milliseconds
             fade_max_ms: Maximum fade-out duration in milliseconds
@@ -53,22 +53,6 @@ class LightningEffect(Effect):
         super().__init__(client, options)
         self.flash_color = None
         self.target_devices = []
-        
-        # Color mapping for string input
-        self.color_map = {
-            "white": Colors.WHITE.value,
-            "blue": Colors.BLUE.value,
-            "yellow": Colors.YELLOW.value,
-            "cyan": Colors.CYAN.value,
-            "light_blue": Colors.LIGHT_BLUE.value,
-            "orange": Colors.ORANGE.value,
-            "red": Colors.RED.value,
-            "green": Colors.GREEN.value,
-            "magenta": Colors.MAGENTA.value,
-            "pink": Colors.PINK.value,
-            "violet": Colors.VIOLET.value,
-            "indigo": Colors.INDIGO.value,
-        }
     
     def start(self):
         """Initialize the effect."""
@@ -78,18 +62,7 @@ class LightningEffect(Effect):
     
     def _select_flash_color(self):
         """Select the color for the lightning flash."""
-        if self.options.color.lower() == "random":
-            # Random color from available colors (excluding black)
-            available_colors = [color.value for color in Colors if color != Colors.BLACK]
-            self.flash_color = random.choice(available_colors)
-        else:
-            # Use specified color
-            color_name = self.options.color.lower()
-            if color_name in self.color_map:
-                self.flash_color = self.color_map[color_name]
-            else:
-                print(f"Warning: Unknown color '{self.options.color}'. Using white.")
-                self.flash_color = Colors.WHITE.value
+        self.flash_color = parse_color(self.options.color)
     
     def _select_target_devices(self):
         """Select which devices to target for this lightning strike."""

@@ -2,7 +2,7 @@
 Static effect - sets devices to a specific color and keeps them static.
 """
 
-from classes import Effect, EffectOptions, Colors
+from classes import Effect, EffectOptions, Colors, parse_color
 from openrgb.utils import RGBColor
 
 
@@ -20,7 +20,7 @@ class StaticOptions(EffectOptions):
         Initialize static options.
         
         Args:
-            color: Color to set (can be a color name like 'red', 'blue', etc. or RGB values like '255,0,0')
+            color: Color to set (can be 'random', a color name like 'red', 'blue', etc., RGB values like '255,0,0', or hex codes like '#FF0000')
             brightness: Brightness multiplier (0.0 to 1.0)
         """
         super().__init__(sleep_s, devices, max_brightness)
@@ -42,44 +42,12 @@ class StaticEffect(Effect):
         Parse color string into RGBColor object.
         
         Args:
-            color_str: Color string (e.g., 'red', '255,0,0', '#FF0000')
+            color_str: Color string (e.g., 'red', '255,0,0', '#FF0000', 'random')
             
         Returns:
             RGBColor object
         """
-        color_str = color_str.strip().lower()
-        
-        # Check if it's a predefined color name
-        if hasattr(Colors, color_str.upper()):
-            return getattr(Colors, color_str.upper()).value
-        
-        # Check if it's RGB values (comma-separated)
-        if ',' in color_str:
-            try:
-                parts = color_str.split(',')
-                if len(parts) == 3:
-                    r = int(parts[0].strip())
-                    g = int(parts[1].strip())
-                    b = int(parts[2].strip())
-                    return RGBColor(r, g, b)
-            except ValueError:
-                pass
-        
-        # Check if it's a hex color
-        if color_str.startswith('#'):
-            try:
-                hex_color = color_str[1:]  # Remove #
-                if len(hex_color) == 6:
-                    r = int(hex_color[0:2], 16)
-                    g = int(hex_color[2:4], 16)
-                    b = int(hex_color[4:6], 16)
-                    return RGBColor(r, g, b)
-            except ValueError:
-                pass
-        
-        # Default to white if parsing fails
-        print(f"Warning: Could not parse color '{color_str}', using white")
-        return Colors.WHITE.value
+        return parse_color(color_str)
     
     def _kill_own_process(self):
         """
