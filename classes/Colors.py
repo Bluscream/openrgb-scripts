@@ -102,13 +102,13 @@ def parse_color(color_str: str) -> RGBColor:
 
 def parse_brightness(brightness_str: str) -> float:
     """
-    Parse brightness string into float value (0.0 to 1.0).
+    Parse brightness string into float value (0.0 to 1.0), rounded to two decimal places.
     
     Args:
         brightness_str: Brightness string (e.g., '0.5', '50%', 'random')
         
     Returns:
-        Float value between 0.0 and 1.0
+        Float value between 0.0 and 1.0, rounded to two decimal places
         
     Example:
         # Parse different brightness formats
@@ -120,20 +120,23 @@ def parse_brightness(brightness_str: str) -> float:
     
     # Handle random brightness
     if brightness_str == "random":
-        return random.uniform(0.1, 1.0)  # Random between 10% and 100%
+        value = random.uniform(0.1, 1.0)  # Random between 10% and 100%
+        return round(value, 2)
     
     # Handle percentage format
     if brightness_str.endswith('%'):
         try:
             percentage = float(brightness_str[:-1])  # Remove % and convert to float
-            return max(0.0, min(1.0, percentage / 100.0))  # Clamp to 0.0-1.0
+            value = max(0.0, min(1.0, percentage / 100.0))  # Clamp to 0.0-1.0
+            return round(value, 2)
         except ValueError:
             pass
     
     # Handle float format
     try:
         value = float(brightness_str)
-        return max(0.0, min(1.0, value))  # Clamp to 0.0-1.0
+        value = max(0.0, min(1.0, value))  # Clamp to 0.0-1.0
+        return round(value, 2)
     except ValueError:
         pass
     

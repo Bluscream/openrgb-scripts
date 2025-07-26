@@ -8,4 +8,6 @@ set "min_brightness=%3"
 if "%min_brightness%"=="" set "min_brightness=0.1"
 set "max_brightness=%4"
 if "%max_brightness%"=="" set "max_brightness=1"
+echo Breathing effect with color: %color%, speed: %speed%, min_brightness: %min_brightness%, max_brightness: %max_brightness%
+echo Brightness formats supported: 0.5, 50%%, random
 python __main__.py --effect Breathing -o "color=%color%,breathing_speed=%speed%,min_brightness=%min_brightness%,max_brightness=%max_brightness%" 

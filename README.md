@@ -134,10 +134,13 @@ For Windows users, convenient command files are available in the `tools/` direct
 tools\breathing.cmd
 
 # Custom breathing parameters (color, speed, min_brightness, max_brightness)
-tools\breathing.cmd red 1.5 0.2 0.8
+tools\breathing.cmd red 1.5 20% 80%
 
-# Static color effect
-tools\static.cmd blue 0.7
+# Static color effect with percentage brightness
+tools\static.cmd blue 50%
+
+# Static color effect with random brightness
+tools\static.cmd red random
 
 # Rainbow effect
 tools\rainbow.cmd
@@ -188,7 +191,7 @@ options = EffectOptions(devices=[0, 2])  # Devices 0 and 2
 options = EffectOptions(devices=[1])  # Device 1 only
 ```
 
-### Using Colors
+### Using Colors and Brightness
 
 ```python
 from classes import Colors, RAINBOW_COLORS, lerp_color, parse_color, parse_brightness
@@ -211,10 +214,22 @@ random_color = parse_color('random')
 half_brightness = parse_brightness('0.5')
 quarter_brightness = parse_brightness('25%')
 random_brightness = parse_brightness('random')
+full_brightness = parse_brightness('100%')
 
 # Interpolate between colors
 mid_color = lerp_color(Colors.RED.value, Colors.BLUE.value, 0.5)  # Purple
 ```
+
+### Brightness Formats
+
+The `parse_brightness()` function supports multiple formats:
+
+- **Float values**: `'0.5'` → `0.5`
+- **Percentage format**: `'50%'` → `0.5`, `'25%'` → `0.25`
+- **Random brightness**: `'random'` → Random value between 0.1 and 1.0
+- **Automatic clamping**: All values are clamped to 0.0-1.0 range
+
+This works for all brightness parameters including `max_brightness` and `min_brightness`.
 
 ## Creating Custom Effects
 

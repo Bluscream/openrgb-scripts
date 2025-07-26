@@ -4,4 +4,6 @@ set "color=%1"
 if "%color%"=="" set "color=white"
 set "brightness=%2"
 if "%brightness%"=="" set "brightness=1"
+echo Static effect with color: %color%, brightness: %brightness%
+echo Brightness formats supported: 0.5, 50%%, random
 python __main__.py --effect Static -o "color=%color%,max_brightness=%brightness%" --exit 
