@@ -66,6 +66,8 @@ class AudioEffect(Effect):
         try:
             devices = sd.query_devices()
             print("Available audio input devices:")
+            
+            input_devices = []
             for i, device in enumerate(devices):
                 # Handle different device dictionary structures
                 max_inputs = device.get('max_inputs', 0)
@@ -73,27 +75,57 @@ class AudioEffect(Effect):
                     device_name = device.get('name', f'Device {i}')
                     sample_rate = device.get('default_samplerate', 'Unknown')
                     print(f"  {i}: {device_name} (inputs: {max_inputs}, sample rates: {sample_rate}Hz)")
+                    input_devices.append(i)
+            
+            if not input_devices:
+                print("  No input devices found!")
+                print("\nTROUBLESHOOTING:")
+                print("• If using Voicemeeter, it may be blocking direct audio device access")
+                print("• Try disabling Voicemeeter temporarily to test")
+                print("• Check Windows Sound settings to ensure input devices are enabled")
+                print("• Make sure you have a microphone or audio input device connected")
             
             # Show default device
             try:
-                default_device = sd.default.device[0]  # Input device
-                print(f"\nDefault input device: {default_device}")
+                default_input = sd.default.device[0]
+                print(f"\nDefault input device: {default_input}")
+                if default_input < len(devices):
+                    default_device = devices[default_input]
+                    default_name = default_device.get('name', 'Unknown')
+                    default_inputs = default_device.get('max_inputs', 0)
+                    print(f"Default device info: {default_name} (inputs: {default_inputs})")
+                    
+                    if default_inputs == 0:
+                        print("⚠️  Warning: Default device has no inputs!")
             except Exception as e:
-                print(f"\nCould not determine default input device: {e}")
+                print(f"Could not determine default device: {e}")
                 
         except Exception as e:
             print(f"Error querying audio devices: {e}")
             print("Make sure sounddevice is properly installed and audio drivers are working.")
-            print("You can still use the effect with default settings.")
         
     def _get_default_input_device(self):
         """Get the default input device index."""
         try:
             devices = sd.query_devices()
+            
+            # First try the default device
+            try:
+                default_device = sd.default.device[0]
+                if default_device < len(devices):
+                    device_info = devices[default_device]
+                    max_inputs = device_info.get('max_inputs', 0)
+                    if max_inputs > 0:
+                        return default_device
+            except Exception:
+                pass
+            
+            # Search for any device with inputs
             for i, device in enumerate(devices):
                 max_inputs = device.get('max_inputs', 0)
                 if max_inputs > 0:
                     return i
+            
             return None
         except Exception as e:
             print(f"Error getting default input device: {e}")
@@ -131,6 +163,7 @@ class AudioEffect(Effect):
         try:
             # Calculate RMS of audio data using pure Python
             rms = self._calculate_rms(indata)
+            self._last_rms = rms  # Store for debugging
             
             current_time = time.time()
             
@@ -172,6 +205,8 @@ class AudioEffect(Effect):
                         
         except Exception as e:
             print(f"Error in audio callback: {e}")
+            import traceback
+            traceback.print_exc()
     
     def start(self):
         """Start the audio effect."""
@@ -182,9 +217,51 @@ class AudioEffect(Effect):
             
             if device is None:
                 print("No suitable audio input device found!")
+                print("\nTROUBLESHOOTING:")
+                print("1. Make sure you have a microphone or audio input device connected")
+                print("2. If using Voicemeeter, try disabling it temporarily")
+                print("3. Check Windows Sound settings to ensure input devices are enabled")
+                print("4. Try running the effect with a specific device number")
                 return
             
             print(f"Starting audio effect with device {device}")
+            
+            # Add device info for debugging
+            try:
+                devices = sd.query_devices()
+                # Ensure device is an integer
+                device_index = int(device) if device is not None else None
+                
+                if device_index is not None and device_index < len(devices):
+                    device_info = devices[device_index]
+                    device_name = device_info.get('name', 'Unknown')
+                    max_inputs = device_info.get('max_inputs', 0)
+                    sample_rate = device_info.get('default_samplerate', 'Unknown')
+                    
+                    print(f"Device info: {device_name}")
+                    print(f"Max inputs: {max_inputs}")
+                    print(f"Sample rate: {sample_rate}")
+                    
+                    # Check if device actually has inputs
+                    if max_inputs <= 0:
+                        print(f"ERROR: Device '{device_name}' has no inputs (max_inputs: {max_inputs})")
+                        print("This device cannot be used for audio recording.")
+                        print("Try selecting a different audio device or check your audio settings.")
+                        return
+                        
+                elif device_index is not None:
+                    print(f"ERROR: Device index {device_index} is out of range (max: {len(devices)-1})")
+                    return
+                else:
+                    print("ERROR: Invalid device index")
+                    return
+                    
+            except (ValueError, TypeError) as e:
+                print(f"Could not get device info: Invalid device index '{device}' - {e}")
+                return
+            except Exception as e:
+                print(f"Could not get device info: {e}")
+                return
             
             self.running = True
             self.stream = sd.InputStream(
@@ -195,12 +272,19 @@ class AudioEffect(Effect):
                 callback=self._audio_callback
             )
             self.stream.start()
+            print("Audio stream started successfully!")
             
         except Exception as e:
             print(f"Error starting audio effect: {e}")
+            import traceback
+            traceback.print_exc()
+            self.running = False
     
     def loop(self):
         """Main effect loop."""
+        if not self.running:
+            return
+            
         with self.lock:
             self.set_all_target_devices_color(self.current_color)
     

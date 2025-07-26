@@ -132,7 +132,7 @@ class AudioLoopbackEffect(Effect):
             devices = sd.query_devices()
             # Look for loopback devices (like "Stereo Mix" on Windows)
             for i, device in enumerate(devices):
-a                max_inputs = device.get('max_inputs', 0)
+                max_inputs = device.get('max_inputs', 0)
                 device_name = device.get('name', '')
                 if (max_inputs > 0 and 
                     ('mix' in device_name.lower() or 
